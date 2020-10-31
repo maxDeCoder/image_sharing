@@ -3,7 +3,6 @@ const path = require("path");
 const app = express();
 const fs = require("fs");
 const busboy = require("connect-busboy");
-const socketio = require("socket.io");
 const random = require("random-number").generator({
     min: 100000000,
     max: 999999999,
@@ -11,7 +10,7 @@ const random = require("random-number").generator({
 })
 
 var node_list = [];
-
+const apikey = process.env["GLOBAL_KEY"] || 0;
 app.use(busboy());
 const port = process.env.PORT || 80;
 app.use(express.static(path.join(__dirname, "public")));
@@ -53,7 +52,7 @@ app.post("/python/", (req, res) => {
 });
 
 app.get("/images/:filename/:key", (req, res) => {
-    if (req.params.key == process.env["GLOBAL_KEY"]) {
+    if (req.params.key == apikey) {
         const filename = req.params.filename;
         var fstream = fs.createReadStream(
             path.join(__dirname, "/images/" + filename)
@@ -108,7 +107,7 @@ app.get("/python/update_status/:id", (req, res) => {
 });
 
 app.get("/set_status/:id/:info/:status/:key", (req, res) => {
-    if (req.params.key == process.env["GLOBAL_KEY"]) {
+    if (req.params.key == apikey) {
         for (var i = 0; i < node_list.length; i++) {
             if (node_list[i].id == req.params.id) {
                 if (node_list[i][req.params.info] != undefined) {
@@ -124,7 +123,7 @@ app.get("/set_status/:id/:info/:status/:key", (req, res) => {
 });
 
 app.post("/send_message/:id/:key", (req,res) => {
-    if(req.params.key == process.env["GLOBAL_KEY"]){
+    if(req.params.key == apikey){
         for(var i = 0;i < node_list.length; i++){
             if(node_list[i].id == id){
                 node_list[i].message = req.body.info;
@@ -136,7 +135,7 @@ app.post("/send_message/:id/:key", (req,res) => {
 });
 
 app.get("/info/:key", (req, res) => {
-    if (req.params.key == process.env["GLOBAL_KEY"]) {
+    if (req.params.key == apikey) {
         res.contentType("application/json");
         res.json(node_list);
     }
