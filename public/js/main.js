@@ -52,12 +52,13 @@ async function updateInfo() {
     currentData = info;
 
     info.forEach(element => {
-        changeImage(element.id);
+        changeImage(element.id, "cam_");
+        changeImage(element.id, "ss_");
         // document.getElementById(`${element.id}_name`).innerHTML = `name : ${element.name}`;
         document.getElementById(`${element.id}_cam`).innerHTML = `camera capture : ${element.enable_cam}`;
         document.getElementById(`${element.id}_ss`).innerHTML = `ss capture : ${element.enable_ss}`
         document.getElementById(`${element.id}_status_g`).innerHTML = `connection : ${element.status_g}`;
-        document.getElementById(`${element.id}_start_up`).innerHTML = `start_up : ${element.startup}`;
+        document.getElementById(`${element.id}_startup`).innerHTML = `start_up : ${element.startup}`;
         document.getElementById(`${element.id}_kill`).innerHTML = `kill : ${element.kill}`;
     })
 }
@@ -72,10 +73,11 @@ async function toggleAttr(id, attr) {
         }
     })
 
-    fetch(`/set_status/${name}/${attr}/${update_to}/${key}`);
+    fetch(`/set_status/${id}/${attr}/${update_to}/${key}`);
 }
 
-async function  sendMessage(id, msg){
+async function sendMessage(id){
+  const msg = document.getElementById(`${id}_msg`).value
     const options = {
         method: "POST",
         headers: {'Content-Type' : 'application/json'},
@@ -84,17 +86,16 @@ async function  sendMessage(id, msg){
     fetch(`/send_message/${id}/${key}`, options)
 }
 
-async function changeImage(id) {
-    console.log("changing");
-    const filepath = id + ".jpeg";
-    var request = new Request(`https://vedant-test.glitch.me/images/${filepath}/${key}`);
+async function changeImage(id, mod) {
+    const filepath = mod + id + ".jpeg";
+    var request = new Request(`https://vedantimagetest.glitch.me/images/${filepath}/${key}`);
     fetch(request).then(response => {
         response.arrayBuffer().then(buffer => {
             var base64Flag = "data:image/jpeg;base64,";
             var imageStr = arrayBufferToBase64(buffer);
             var doms = document.querySelectorAll(".img_class");
             doms.forEach(element => {
-                if (element.id == `i_${id}`) {
+                if (element.id == `${id}`) {
                     element.src = base64Flag + imageStr;
                 }
             })
@@ -108,8 +109,4 @@ function arrayBufferToBase64(buffer) {
     bytes.forEach(b => (binary += String.fromCharCode(b)));
 
     return window.btoa(binary);
-}
-
-async function sendMessage() {
-
 }
